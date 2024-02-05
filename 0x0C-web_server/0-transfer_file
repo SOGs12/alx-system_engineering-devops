@@ -11,7 +11,8 @@ fi
 
 path_to_file=$1
 ip=$2
-username=$3
+username="ubuntu"
+key="-/.ssh/id_rsa"
 path_to_ssh_key=$4
 
 # disabbling strict host key checking
