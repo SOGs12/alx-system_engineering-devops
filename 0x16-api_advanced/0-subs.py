@@ -19,12 +19,18 @@ def number_of_subscribers(subreddit):
     # Construct the URL for the subreddit's about page in JSON format
     url = f"https://www.reddit.com/r/{subreddit}/about.json"
     response = requests.get(url, headers={'User-Agent': 'app/1.0'})
+    
     if response.status_code == 200:
         # Parse the JSON response
         data = response.json()
-        subscribers = data['data']['subscribers']
-        return subscribers
+        if 'data' in data and 'subscribers' in data['data']:
+            subscribers = data['data']['subscribers']
+            return subscribers
+        else:
+            # If 'data' or 'subscribers' key is missing, return 0
+            return 0
     else:
+        # If response status code is not 200, return 0
         return 0
 
 
@@ -37,3 +43,4 @@ if __name__ == "__main__":
     # Test for non-existing subreddit
     non_existing_subreddit = "nonexistingsubreddit"
     print(f"Subscribers for {non_existing_subreddit}: {number_of_subscribers(non_existing_subreddit)}")
+
