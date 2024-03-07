@@ -1,61 +1,35 @@
 #!/usr/bin/python3
-"""
-Script to query a list of all hot posts on a given Reddit subreddit.
-"""
+"""Script to paginate response"""
 
 import requests
 
 
-def recurse(subreddit, hot_list=[], after="", count=0):
+def recurse(subreddit, hot_list=[], page=1, limit=100):
+    """A recursive function that queries the Reddit API
+    returns a list containing the titles
+    of all hot articles for a given subreddit.
     """
-    Recursively retrieves a list of titles of all hot posts
-    on a given subreddit.
 
-    Args:
-        subreddit (str): The name of the subreddit.
-        hot_list (list, optional): List to store the post titles.
-                                    Default is an empty list.
-        after (str, optional): Token used for pagination.
-                                Default is an empty string.
-        count (int, optional): Current count of retrieved posts. Default is 0.
+    if len(hot_list) >= limit:
+        return hot_list
 
-    Returns:
-        list: A list of post titles from the hot section of the subreddit.
-    """
-    # Construct the URL for the subreddit's hot posts in JSON format
-    url = "https://www.reddit.com/r/{}/hot/.json".format(subreddit)
-
-    # Define headers for the HTTP request, including User-Agent
+    url = f"https://www.reddit.com/r/{subreddit}/hot.json"
+    params = {"page": page}
     headers = {
-        "User-Agent": "linux:0x16.api.advanced:v1.0.0 (by /u/bdov_)"
+        "User-Agent": "Mozilla"
     }
 
-    # Define parameters for the request, including pagination and limit
-    params = {
-        "after": after,
-        "count": count,
-        "limit": 100
-    }
-
-    # Send a GET request to the subreddit's hot posts page
-    response = requests.get(url, headers=headers, params=params,
-                            allow_redirects=False)
-
-    # Check if the response status code indicates a not-found error (404)
-    if response.status_code == 404:
+    res = requests.get(url, params=params, headers=headers)
+    if res.status_code == 404:
         return None
-    # Parse the JSON response and extract relevant data
-    results = response.json().get("data")
-    after = results.get("after")
-    count += results.get("dist")
+    data = res.json()
 
-    # Append post titles to the hot_list
-    for c in results.get("children"):
-        hot_list.append(c.get("data").get("title"))
+    if "data" in data and "children" in data["data"]:
+        articles = data["data"]["children"]
+        for article in articles:
+            hot_list.append(article["data"]["title"])
 
-    # If there are more posts to retrieve, recursively call the function
-    if after is not None:
-        return recurse(subreddit, hot_list, after, count)
-
-    # Return the final list of hot post titles
+    if "data" in data and "after" in data["data"]:
+        page += 1
+        return recurse(subreddit, hot_list, page)
     return hot_list
