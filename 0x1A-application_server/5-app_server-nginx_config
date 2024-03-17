@@ -1,3 +1,5 @@
+# Default server configuration
+#
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
@@ -18,9 +20,9 @@ server {
         proxy_pass http://127.0.0.1:5001/number_odd_or_even/$1;
     }
 
-    # Serve API on AirBnB_clone_v3
+    # Serve AirBnB_clone_v3 API
     location /api/ {
-        proxy_pass http://127.0.0.1:5002/;
+        proxy_pass http://127.0.0.1:5002/api;
     }
 
     # Configure /2-hbnb route of AirBnB_clone_v4 as root location
@@ -34,7 +36,7 @@ server {
     }
 
     error_page 404 /404.html;
-    location /404 {
+    location = /404 {
       root /var/www/html;
       internal;
     }
